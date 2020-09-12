@@ -33,13 +33,50 @@ class Graph:
         else:
             self.edges = set(edges)
     
+    
     @classmethod
-    def areIsomorphic(self,graphOne,graphTwo):
+    def couldBeIsomorphic(cls,graphOne,graphTwo):
         
-        if graphOne.edgesCardinality() != graphTwo.edgesCardinality or graphOne.nodesCardinality() != graphTwo.nodesCardinality():
+        if not (graphOne.hasSameEdgesCardinality(graphTwo) and graphOne.hasSameNodesCardinality(graphTwo)):
+            return False
+        elif sorted(graphOne.degreesMultiset()) == sorted(graphTwo.degreesMultiset()):
+            return False
+        elif len(graphOne.loops()) != len(graphTwo.loops()):
             return False
 
         return True
+    
+    def loops(self):
+        loopsArray = []
+        
+        for edge in self.edges:
+            if edge.destinationNode == edge.sourceNode:
+                loopsArray.append(edge.sourceNode)
+        
+        return loopsArray 
+    
+    def inputGrade(self,aNode):
+        return len(self.leftNeighbourhood(aNode))
+
+    def outputGrade(self,aNode):
+        return len(self.rightNeighbourhood(aNode))
+
+    def grade(self,aNode):
+        return (self.inputGrade(aNode),self.outputGrade(aNode)) 
+
+    def degreesMultiset(self):
+        degreesMultiset = []
+
+        for node in self.nodes:
+            degreesMultiset.append(self.grade(node))
+
+        return degreesMultiset
+
+    def hasSameEdgesCardinality(self,anotherGraph):
+        return self.edgesCardinality() != anotherGraph.edgesCardinality()
+
+    def hasSameNodesCardinality(self,anotherGraph):
+        return self.nodesCardinality() != anotherGraph.nodesCardinality()
 
     def addNode(self,node):
         self.nodes.add(node)
@@ -114,19 +151,6 @@ class Graph:
         
         return arrayOfNodes
     
-    def isTherePath(self,sourceNode,destinationNode):
-        
-        sourceNodeRightNeighbourhood = self.rightNeighbourhood(sourceNode)
-        
-        if destinationNode in sourceNodeRightNeighbourhood:
-            return True
-        
-        for node in sourceNodeRightNeighbourhood:
-            if(self.isTherePath(node,destinationNode)):
-                return True
-
-        return False
-        
     def path(self,sourceNode,destinationNode):
     
         OPEN = []
